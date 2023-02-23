@@ -51,35 +51,27 @@ public class GameSetupController {
 
         for (Node node : shipsContainer.getChildren()) {
             int col = format(GridPane.getColumnIndex(node));
-
-            if (col > 1) {
-                continue;
-            }
-
+            if (col > 1) continue;
             int row = format(GridPane.getRowIndex(node));
-
-            if (row > Grid.MAX_SHIP_LENGTH) {
-                continue;
-            }
-
+            if (row > Grid.MAX_SHIP_LENGTH) continue;
             if (node instanceof Button) {
                 Button button = (Button) node;
                 int length = row + 1;
                 final int finalRow = row;
-
                 button.setOnMouseClicked(mouseEvent -> {
-                    if (Game.playerGrid.isLengthNotCompleted(length)) {
-                        if (selectedShipLength != length) {
-                            selectedShipLength = length;
+                    if (!Game.playerGrid.isLengthNotCompleted(length)) {
+                        return;
+                    }
+                    if (selectedShipLength != length) {
+                        selectedShipLength = length;
 
-                            resetButtonsOpacity();
-                            setButtonsOpacity(finalRow, 0.3);
-                            showOnShipPickHints();
-                        } else {
-                            resetShipSelection();
-                            setButtonsOpacity(finalRow, 0);
-                            showOnShipDropHints();
-                        }
+                        resetButtonsOpacity();
+                        setButtonsOpacity(finalRow, 0.3);
+                        showOnShipPickHints();
+                    } else {
+                        resetShipSelection();
+                        setButtonsOpacity(finalRow, 0);
+                        showOnShipDropHints();
                     }
                 });
             } else {
@@ -100,22 +92,22 @@ public class GameSetupController {
 
     @FXML
     private void onGridPaneMouseMoved(MouseEvent mouseEvent) {
-        if (selectedShipLength != -1) {
-            Ship ship = getSelectedShip();
-            Coordinates coordinates = getGridPaneCoordinatesOfMouse(mouseEvent);
-
-            if (lastX != coordinates.x() || lastY != coordinates.y()) {
-                Ship newShip = getSelectedShip(coordinates.x(), coordinates.y());
-
-                if (canSelectedShipBePlaced(newShip)) {
-                    lastX = coordinates.x();
-                    lastY = coordinates.y();
-
-                    removeShipFromGridPane(ship);
-                    drawShipSilhouette(newShip);
-                }
-            }
+        if (selectedShipLength == -1) {
+            return;
         }
+        Ship ship = getSelectedShip();
+        Coordinates coordinates = getGridPaneCoordinatesOfMouse(mouseEvent);
+        if (lastX == coordinates.x() && lastY == coordinates.y()) {
+            return;
+        }
+        Ship newShip = getSelectedShip(coordinates.x(), coordinates.y());
+        if (!canSelectedShipBePlaced(newShip)) {
+            return;
+        }
+        lastX = coordinates.x();
+        lastY = coordinates.y();
+        removeShipFromGridPane(ship);
+        drawShipSilhouette(newShip);
     }
 
     @FXML
@@ -128,37 +120,33 @@ public class GameSetupController {
     private void onGridPaneMouseClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY && selectedShipLength != -1) {
             Ship ship = getSelectedShip();
-
-            if (canSelectedShipBePlaced(ship)) {
-                removeShipFromGridPane(ship);
-                Game.playerGrid.addShip(ship);
-                updateGrid();
-                clearButton.setDisable(false);
-                decrementShipCount(selectedShipLength);
-
-                resetLastCoordinates();
-
-                if (Game.playerGrid.isFullyCompleted()) {
-                    startGameButton.setDisable(false);
-                }
+            if (!canSelectedShipBePlaced(ship)) {
+                return;
             }
+            removeShipFromGridPane(ship);
+            Game.playerGrid.addShip(ship);
+            updateGrid();
+            clearButton.setDisable(false);
+            decrementShipCount(selectedShipLength);
+            resetLastCoordinates();
+            if (!Game.playerGrid.isFullyCompleted()) {
+                return;
+            }
+            startGameButton.setDisable(false);
         } else if (mouseEvent.getButton() == MouseButton.SECONDARY) {
             if (selectedShipLength == -1) {
                 Coordinates coordinates = getGridPaneCoordinatesOfMouse(mouseEvent);
-
-                if (Game.playerGrid.hasShip(coordinates)) {
-                    Ship ship = Game.playerGrid.getShip(coordinates);
-
-                    Game.playerGrid.removeShip(coordinates);
-                    incrementShipCount(ship.getLength());
-                    startGameButton.setDisable(true);
-                    updateGrid();
+                if (!Game.playerGrid.hasShip(coordinates)) {
+                    return;
                 }
+                Ship ship = Game.playerGrid.getShip(coordinates);
+                Game.playerGrid.removeShip(coordinates);
+                incrementShipCount(ship.getLength());
+                startGameButton.setDisable(true);
+                updateGrid();
             } else {
                 removeShipFromGridPane(getSelectedShip());
-
                 isSelectedShipHorizontal = !isSelectedShipHorizontal;
-
                 Ship newShip = getSelectedShip();
 
                 if (canSelectedShipBePlaced(newShip)) {
@@ -223,9 +211,7 @@ public class GameSetupController {
     private void drawShipSilhouette(Ship ship) {
         ship.forEachCoordinate((x, y) -> {
             ImageView shipImage = ship.getShipPart(x, y);
-
             shipImage.setOpacity(0.5);
-
             gridPane.add(shipImage, x, y);
         });
     }
@@ -242,25 +228,18 @@ public class GameSetupController {
 
     private void resetButtonsOpacity() {
         for (Node node : shipsContainer.getChildren()) {
-            if (node instanceof Button) {
-                node.setOpacity(0);
-            }
+            if (!(node instanceof Button)) continue;
+            node.setOpacity(0);
         }
     }
 
     private void setButtonsOpacity(int row, double opacity) {
         for (Node node1 : shipsContainer.getChildren()) {
-            if (node1 instanceof Button) {
-                Integer row1 = GridPane.getRowIndex(node1);
-
-                if (row1 == null) {
-                    row1 = 0;
-                }
-
-                if (row1.equals(row)) {
-                    node1.setOpacity(opacity);
-                }
-            }
+            if (!(node1 instanceof Button)) continue;
+            Integer row1 = GridPane.getRowIndex(node1);
+            if (row1 == null) row1 = 0;
+            if (!row1.equals(row)) continue;
+            node1.setOpacity(opacity);
         }
     }
 
@@ -268,36 +247,28 @@ public class GameSetupController {
         Label label = shipsLabels.get(shipLength - 1);
         int maxCount = Grid.MAX_SHIP_LENGTH - shipLength + 1;
         int count = maxCount - Game.playerGrid.getShipsCount(shipLength);
-
         label.setText(count + "/" + maxCount);
-
-        if (count <= 0) {
-            setShipSelectInactive(shipLength);
-            resetButtonsOpacity();
-            resetShipSelection();
-            showOnShipDropHints();
-        }
+        if (count > 0) return;
+        setShipSelectInactive(shipLength);
+        resetButtonsOpacity();
+        resetShipSelection();
+        showOnShipDropHints();
     }
 
     private void incrementShipCount(int shipLength) {
         Label label = shipsLabels.get(shipLength - 1);
         int maxCount = Grid.MAX_SHIP_LENGTH - shipLength + 1;
         int count = maxCount - Game.playerGrid.getShipsCount(shipLength);
-
         label.setText(count + "/" + maxCount);
-
-        if (count > 0) {
-            setShipSelectActive(shipLength);
-        }
+        if (count <= 0) return;
+        setShipSelectActive(shipLength);
     }
 
     private void setAllShipsCounts() {
         Grid.forEachShipLength(length -> {
             int maxCount = Grid.MAX_SHIP_LENGTH - length + 1;
             int count = maxCount - Game.playerGrid.getShipsCount(length);
-
             shipsLabels.get(length - 1).setText(count + "/" + maxCount);
-
             if (count <= 0) {
                 setShipSelectInactive(length);
             } else {
@@ -357,17 +328,13 @@ public class GameSetupController {
 
     private void removeShipFromGridPane(Ship ship) {
         for (Node node : new HashSet<>(gridPane.getChildren())) {
-            if (node instanceof ImageView) {
-                Integer x = GridPane.getColumnIndex(node);
-                Integer y = GridPane.getRowIndex(node);
-
-                if (x == null) x = 0;
-                if (y == null) y = 0;
-
-                if (ship.isOnShip(x, y)) {
-                    gridPane.getChildren().remove(node);
-                }
-            }
+            if (!(node instanceof ImageView)) continue;
+            Integer x = GridPane.getColumnIndex(node);
+            Integer y = GridPane.getRowIndex(node);
+            if (x == null) x = 0;
+            if (y == null) y = 0;
+            if (ship.isOnShip(x, y)) continue;
+            gridPane.getChildren().remove(node);
         }
     }
 
@@ -378,9 +345,8 @@ public class GameSetupController {
 
         for (int x = ship.getBeginX(); x <= ship.getEndX(); x++) {
             for (int y = ship.getBeginY(); y <= ship.getEndY(); y++) {
-                if (Game.playerGrid.hasShipNearby(x, y)) {
-                    return false;
-                }
+                if (!Game.playerGrid.hasShipNearby(x, y)) continue;
+                return false;
             }
         }
 
