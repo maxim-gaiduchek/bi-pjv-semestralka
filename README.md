@@ -1,3 +1,3 @@
-# Морський бій
+# Námořní bitva
 
-Курсова робота студента Гайдучека Максима, група ІП-14, ФІОТ, КПІ
+Semestrální práce studenta Maksymu Gaiducheku
