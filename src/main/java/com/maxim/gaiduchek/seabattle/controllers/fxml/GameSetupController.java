@@ -218,12 +218,12 @@ public class GameSetupController {
 
     private void showOnShipPickHints() {
         leftClickHint.setVisible(true);
-        rightClickHint.setText("ПКМ - повернути корабель");
+        rightClickHint.setText("PTM - otočit loď");
     }
 
     private void showOnShipDropHints() {
         leftClickHint.setVisible(false);
-        rightClickHint.setText("ПКМ - видалити корабель");
+        rightClickHint.setText("PTM - odstranit loď");
     }
 
     private void resetButtonsOpacity() {

@@ -96,7 +96,7 @@ public class App extends Application {
     // alerts
 
     public static void openEndGameAlert(String prompt) {
-        prompt += "\n\nХочете пограти ще раз?";
+        prompt += "\n\nChtěli byste si zahrát znovu?";
         Alert alert = new Alert(Alert.AlertType.NONE, prompt, ButtonType.YES, ButtonType.NO);
 
         alert.setTitle("SeaBattle");
@@ -116,9 +116,9 @@ public class App extends Application {
     }
 
     private static void openCloseApplicationAlert() {
-        ButtonType no = new ButtonType("Ні", ButtonBar.ButtonData.OK_DONE);
-        ButtonType yes = new ButtonType("Так", ButtonBar.ButtonData.CANCEL_CLOSE);
-        String prompt = "Ви дійсно хочете вийти з гри?";
+        ButtonType no = new ButtonType("Ne", ButtonBar.ButtonData.OK_DONE);
+        ButtonType yes = new ButtonType("Ano", ButtonBar.ButtonData.CANCEL_CLOSE);
+        String prompt = "Opravdu chcete skončit hrát?";
         Alert alert = new Alert(Alert.AlertType.NONE, prompt, no, yes);
 
         alert.setTitle("SeaBattle");

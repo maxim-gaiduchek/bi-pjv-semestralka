@@ -83,7 +83,7 @@ public class Game {
         if (isPlayerMoving && !botGrid.isShotted(x, y)) {
             isPlayerMoving = botGrid.shot(botGridPane, x, y, false);
             if (botGrid.isDefeated()) {
-                Platform.runLater(() -> App.openEndGameAlert("ВИ ВИЙГРАЛИ!!!"));
+                Platform.runLater(() -> App.openEndGameAlert("VYHRÁLI JSTE!!!"));
             } else if (!isPlayerMoving) {
                 botShot();
             }
@@ -120,7 +120,7 @@ public class Game {
             }
             if (playerGrid.shot(playerGridPane, x, y, true)) {
                 if (playerGrid.isDefeated()) {
-                    Platform.runLater(() -> App.openEndGameAlert("Ви програли :("));
+                    Platform.runLater(() -> App.openEndGameAlert("Prohráli jste :("));
                 } else {
                     if (playerGrid.isDestroyed(x, y)) {
                         playerFirstShipPart = null;
