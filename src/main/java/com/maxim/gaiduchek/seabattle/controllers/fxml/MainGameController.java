@@ -2,7 +2,7 @@ package com.maxim.gaiduchek.seabattle.controllers.fxml;
 
 import com.maxim.gaiduchek.seabattle.controllers.App;
 import com.maxim.gaiduchek.seabattle.controllers.Game;
-import com.maxim.gaiduchek.seabattle.entities.Grid;
+import com.maxim.gaiduchek.seabattle.entities.IGrid;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -19,7 +19,7 @@ public class MainGameController {
             Game.generateBotGrid();
         }
 
-        Grid.forEachCoordinate((x, y) -> {
+        IGrid.forEachCoordinate((x, y) -> {
             if (Game.playerGrid.hasShip(x, y)) {
                 playerGripPane.add(Game.playerGrid.getShip(x, y).getShipPart(x, y), x, y);
             }
@@ -28,7 +28,7 @@ public class MainGameController {
         Game.setPlayerGridPane(playerGripPane);
         Game.setBotGridPane(botGridPane);
 
-        Grid.forEachCoordinate((x, y) -> {
+        IGrid.forEachCoordinate((x, y) -> {
             Button button = new Button();
 
             button.setOpacity(0);
@@ -49,7 +49,7 @@ public class MainGameController {
         });
     }
 
-    private void drawCell(GridPane gridPane, Grid grid, int x, int y, boolean isEnemy) {
+    private void drawCell(GridPane gridPane, IGrid grid, int x, int y, boolean isEnemy) {
         if (grid.isShotted(x, y)) {
             if (grid.hasShip(x, y)) {
                 if (grid.isDestroyed(x, y)) {

@@ -2,6 +2,8 @@ package com.maxim.gaiduchek.seabattle.controllers;
 
 import com.maxim.gaiduchek.seabattle.entities.Coordinates;
 import com.maxim.gaiduchek.seabattle.entities.Grid;
+import com.maxim.gaiduchek.seabattle.entities.IGrid;
+import com.maxim.gaiduchek.seabattle.factories.GridFactory;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.layout.GridPane;
@@ -16,7 +18,7 @@ public class Game {
 
     private static final String FILENAME = "game.dat";
 
-    public static Grid playerGrid = new Grid(), botGrid;
+    public static IGrid playerGrid = GridFactory.createDefault(), botGrid;
     private static GridPane playerGridPane, botGridPane;
     private static boolean isPlayerMoving = true;
     private static Coordinates playerFirstShipPart, playerSecondShipPart;
@@ -37,11 +39,11 @@ public class Game {
     }
 
     public static void generatePlayerGrid() {
-        playerGrid = Grid.generate();
+        playerGrid = GridFactory.generateDefault();
     }
 
     public static void generateBotGrid() {
-        botGrid = Grid.generate();
+        botGrid = GridFactory.generateDefault();
     }
 
     public static void saveGame() throws IOException {
@@ -92,7 +94,6 @@ public class Game {
 
     private static void botShot() {
         PauseTransition pause = new PauseTransition(Duration.millis(500));
-
         pause.setOnFinished(actionEvent -> {
             int x = 0, y = 0;
             if (playerFirstShipPart != null) {
@@ -140,7 +141,6 @@ public class Game {
                 isPlayerMoving = true;
             }
         });
-
         pause.play();
     }
 

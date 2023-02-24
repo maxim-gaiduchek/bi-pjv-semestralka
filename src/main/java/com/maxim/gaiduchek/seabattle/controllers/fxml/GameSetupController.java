@@ -4,7 +4,9 @@ import com.maxim.gaiduchek.seabattle.controllers.App;
 import com.maxim.gaiduchek.seabattle.controllers.Game;
 import com.maxim.gaiduchek.seabattle.entities.Coordinates;
 import com.maxim.gaiduchek.seabattle.entities.Grid;
+import com.maxim.gaiduchek.seabattle.entities.IGrid;
 import com.maxim.gaiduchek.seabattle.entities.Ship;
+import com.maxim.gaiduchek.seabattle.factories.ShipFactory;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -148,7 +150,6 @@ public class GameSetupController {
                 removeShipFromGridPane(getSelectedShip());
                 isSelectedShipHorizontal = !isSelectedShipHorizontal;
                 Ship newShip = getSelectedShip();
-
                 if (canSelectedShipBePlaced(newShip)) {
                     drawShipSilhouette(newShip);
                 } else {
@@ -174,6 +175,7 @@ public class GameSetupController {
     private void onRandomizeGridClick() {
         startGameButton.setDisable(true);
         generateButton.setDisable(true);
+        resetShipSelection();
         Game.generatePlayerGrid();
         updateGrid();
         setAllShipsCounts();
@@ -198,8 +200,7 @@ public class GameSetupController {
 
     private void updateGrid() {
         gridPane.getChildren().removeIf(node -> node instanceof ImageView);
-
-        Grid.forEachCoordinate((x, y) -> {
+        IGrid.forEachCoordinate((x, y) -> {
             if (Game.playerGrid.hasShip(x, y)) {
                 gridPane.add(Game.playerGrid.getShip(x, y).getShipPart(x, y), x, y);
             } else if (Game.playerGrid.hasShipNearby(x, y)) {
@@ -265,7 +266,7 @@ public class GameSetupController {
     }
 
     private void setAllShipsCounts() {
-        Grid.forEachShipLength(length -> {
+        IGrid.forEachShipLength(length -> {
             int maxCount = Grid.MAX_SHIP_LENGTH - length + 1;
             int count = maxCount - Game.playerGrid.getShipsCount(length);
             shipsLabels.get(length - 1).setText(count + "/" + maxCount);
@@ -301,7 +302,6 @@ public class GameSetupController {
     private Ship getSelectedShip(int x, int y) {
         int beginX, endX;
         int beginY, endY;
-
         if (isSelectedShipHorizontal) {
             beginX = Math.min(Math.max(x - (int) (Math.ceil(selectedShipLength / 2.0) - 1), 0), Grid.MAX_X - selectedShipLength + 1);
             endX = beginX + selectedShipLength - 1;
@@ -311,8 +311,8 @@ public class GameSetupController {
             endY = beginY + selectedShipLength - 1;
             beginX = endX = x;
         }
-
-        return new Ship(new Coordinates(beginX, beginY), new Coordinates(endX, endY));
+        Coordinates begin = new Coordinates(beginX, beginY), end = new Coordinates(endX, endY);
+        return ShipFactory.createShip(begin, end);
     }
 
     private void resetShipSelection() {
@@ -328,12 +328,16 @@ public class GameSetupController {
 
     private void removeShipFromGridPane(Ship ship) {
         for (Node node : new HashSet<>(gridPane.getChildren())) {
-            if (!(node instanceof ImageView)) continue;
+            if (!(node instanceof ImageView)) {
+                continue;
+            }
             Integer x = GridPane.getColumnIndex(node);
             Integer y = GridPane.getRowIndex(node);
             if (x == null) x = 0;
             if (y == null) y = 0;
-            if (ship.isOnShip(x, y)) continue;
+            if (!ship.isOnShip(x, y)) {
+                continue;
+            }
             gridPane.getChildren().remove(node);
         }
     }

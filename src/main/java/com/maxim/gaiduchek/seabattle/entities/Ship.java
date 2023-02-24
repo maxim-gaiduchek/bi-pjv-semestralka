@@ -5,13 +5,16 @@ import javafx.scene.image.ImageView;
 
 import java.util.function.BiConsumer;
 
-public class Ship {
+public abstract class Ship {
 
     private final Coordinates begin, end;
 
     public Ship(Coordinates begin, Coordinates end) {
         this.begin = begin;
         this.end = end;
+        if (Math.abs(isHorizontally() ? begin.x() - end.x() : begin.y() - end.y()) + 1 != getLength()) {
+            throw new IllegalArgumentException("Coordinates do not match the ship's length");
+        }
     }
 
     public Coordinates getBegin() {
@@ -38,27 +41,22 @@ public class Ship {
         return end.y();
     }
 
-    public int getLength() {
-        return Math.abs(isHorizontally() ? begin.x() - end.x() : begin.y() - end.y()) + 1;
-    }
+    public abstract int getLength();
 
     public ImageView getShipPart(int x, int y) {
-        Coordinates cell = new Coordinates(x, y);
-
         if (getLength() == 1) {
             return App.getUnaryShipImageView();
-        } else if (begin.equals(cell) || end.equals(cell)) {
+        }
+        Coordinates cell = new Coordinates(x, y);
+        if (begin.equals(cell) || end.equals(cell)) {
             ImageView imageView = App.getCornerShipImageView();
             int rotate = isHorizontally() ?
                     (begin.x() < end.x() ? 0 : 180) - (end.equals(cell) ? 180 : 0) :
                     (begin.y() < end.y() ? 90 : -90) * (end.equals(cell) ? -1 : 1);
-
             imageView.setRotate(rotate);
-
             return imageView;
-        } else {
-            return App.getMiddleShipImageView();
         }
+        return App.getMiddleShipImageView();
     }
 
     public boolean isOnShip(int x, int y) {
